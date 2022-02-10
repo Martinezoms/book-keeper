@@ -1,6 +1,7 @@
+import { v4 } from "uuid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-function Modal({ setShowModal }) {
+function Modal({ setShowModal, saveBookmark, bookmarks, fetchBookmarks }) {
   const hideModal = (e) => {
     if (e.target.id === "modal-bg") {
       setShowModal(false);
@@ -14,9 +15,6 @@ function Modal({ setShowModal }) {
     const regex = new RegExp(expression);
 
     // validating url
-    if (urlValue.match(regex)) {
-      alert("matches");
-    }
     if (!urlValue.match(regex)) {
       alert("Please provide a valid web address");
       return false;
@@ -30,9 +28,24 @@ function Modal({ setShowModal }) {
     let urlValue = e.target[1].value;
     if (!urlValue.includes("https://") && !urlValue.includes("http://")) urlValue = `https://${urlValue}`;
 
-    validateForm(urlValue);
-    if (!validateForm(urlValue)) return false;
-    console.log(nameValue, urlValue);
+    // Validating form
+    if (validateForm(urlValue)) {
+      const newBookmark = {
+        id: v4(),
+        name: nameValue,
+        url: urlValue
+      };
+
+      if (bookmarks.every((value) => value.url !== newBookmark.url)) {
+        saveBookmark(newBookmark);
+        fetchBookmarks();
+        e.target.reset();
+        e.target[0].focus();
+        setShowModal(false);
+      } else {
+        alert("This web address has already been saved");
+      }
+    }
   };
 
   return (

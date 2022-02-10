@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faS } from "@fortawesome/free-solid-svg-icons";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -9,7 +9,24 @@ import "./App.css";
 library.add(faS, faTimes);
 
 function App() {
+  const [bookmarks, setBookmarks] = useState([]);
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    fetchBookmarks();
+  }, []);
+
+  const fetchBookmarks = () => {
+    if (localStorage.getItem("bookmarks")) {
+      setBookmarks(JSON.parse(localStorage.getItem("bookmarks")));
+    }
+  };
+
+  const saveBookmark = (bookmark) => {
+    const newBookmarks = [...bookmarks, bookmark];
+    setBookmarks(newBookmarks);
+    localStorage.setItem("bookmarks", JSON.stringify(newBookmarks));
+  };
 
   return (
     <div className="App text-white ">
@@ -19,12 +36,21 @@ function App() {
       >
         <h1>add bookmark</h1>
       </div>
-      <div className="flex flex-row xs:flex-col flex-wrap container">
-        <Card />
-        <Card />
-        <Card />
+      <div className="flex flex-row xs:flex-col flex-wrap container m-auto justify-center">
+        {bookmarks.map((bookmark, i) => {
+          return <Card {...bookmark} key={i} bookmarks={bookmarks} setBookmarks={setBookmarks} />;
+        })}
       </div>
-      {showModal && <Modal showModal={showModal} setShowModal={setShowModal} />}
+
+      {showModal && (
+        <Modal
+          showModal={showModal}
+          setShowModal={setShowModal}
+          bookmarks={bookmarks}
+          saveBookmark={saveBookmark}
+          fetchBookmarks={fetchBookmarks}
+        />
+      )}
     </div>
   );
 }
